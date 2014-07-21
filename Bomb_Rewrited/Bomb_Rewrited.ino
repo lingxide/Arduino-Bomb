@@ -1,9 +1,9 @@
 /**********************************************
 
-  *Bomb V1.0
+  *Bomb V1.1
   *Author: Lingxi
-  *Date: 2014/07/20
-  *Build Version: 07202244-1
+  *Date: 2014/07/21
+  *Build Version: 07211115-2
   *FOR TEST ONLY. ILLEGAL USE IS NOT ALLOWED.
   
 ***********************************************/
@@ -30,9 +30,10 @@ int Flag_up_2 = 1;
 int Flag_up_3 = 1;
 
 //Define Counter Module
-int count = 1000;  //Set Counter's Second Here!
+#define COUNTS 15
 #define SECOND 100
 #define BUZZER_TIME 10
+int count = COUNTS;  //Set Counter's Second Here!
 #define APPROCH 30  //Activate Counter When Extrasonic-monitored Data Lower Than This Value (cm)
 //Define Extrasonic Module
 long distance = 0;
@@ -102,7 +103,7 @@ unsigned char ScanKey1()
 //Scan KEY2 When Pressed
 unsigned char ScanKey2()
 {
-  if(Flag_up_2  && digitalRead(KEY1) == LOW)  //When Flag_up_2 = 1 And Pressed
+  if(Flag_up_2  && digitalRead(KEY2) == LOW)  //When Flag_up_2 = 1 And Pressed
   {
     Flag_up_2 = 0;   //Clear Flag_up_2
     display();
@@ -142,27 +143,28 @@ unsigned char ScanKey3()
 //Counters
 void counts()
 {
+  count = COUNTS;
   while(1){
       //Set Buffer
       disbuff[0]=count/1000;
       disbuff[1]=count%1000/100;
       disbuff[2]=count%100/10;
       disbuff[3]=count%10;
-      count--;
+      count--;      
+      digitalWrite(buzzer,HIGH); //Buzzer NOT Work
       //Todo: Combine Extrasonic Module To Control Time Elapse
-      //Todo: Deal With When Count = 0
+      //Todo: Deal With Count = 0
       for (char time=0;time<SECOND;time++)
-        {
-        display();
-        digitalWrite(buzzer,HIGH); //Buzzer NOT Work
-        }
-    
-    for(char t=0;t<BUZZER_TIME;t++)
-        {
-          digitalWrite(buzzer,LOW);  //Buzzer WORKS
-          display();  //Keep Display
-        }
-      
+          {
+               display();
+          }
+
+       for(char t=0;t<BUZZER_TIME;t++)
+           {
+                  digitalWrite(buzzer,LOW);  //Buzzer WORKS
+                  display();  //Keep Display
+            }
+                                
     if( ScanKey2() == 1)
         {
           uncounts();  //Cancel Counting When KEY2 Pressed
@@ -181,10 +183,13 @@ void uncounts()
     disbuff[2]=count%100/10;
     disbuff[3]=count%10;
     display();
-    sonic();  //Keep Extrasonic Monitoring
-    if( ScanKey1() == 1)    //Activate Counting When KEY1 Pressed
+    while(1)
         {
-            counts();
+        sonic();  //Keep Extrasonic Monitoring
+        if( ScanKey1() == 1)    //Activate Counting When KEY1 Pressed
+              {
+                  counts();
+              }
         }
     }
 }
@@ -193,6 +198,7 @@ void uncounts()
 void loop()
 {
 //display();
+digitalWrite(buzzer,HIGH);
 if( ScanKey1() == 1)  //Activate Counting When KEY1 Pressed
     {
         counts();
